@@ -92,6 +92,35 @@ rebrowser/
 |----------|---------|-------------|
 | `VITE_API_URL` | http://localhost:3001 | Backend API URL |
 
+## Run backend from Docker Hub
+
+If the backend image is published (e.g. `ayushman88/docker_browser`):
+
+```bash
+# Pull and run (mount Docker socket so the backend can create browser containers)
+docker run -d \
+  --name rebrowser-api \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -p 3001:3001 \
+  ayushman88/docker_browser:latest
+```
+
+Then run the frontend locally (`cd frontend && npm run dev`) or build and serve it separately.
+
+## Publish backend to Docker Hub
+
+1. Create an account at [hub.docker.com](https://hub.docker.com) and create a repository (e.g. `docker_browser`).
+2. Log in and build, tag, and push from the backend folder:
+
+```bash
+docker login
+cd backend
+docker build -t YOUR_DOCKERHUB_USERNAME/docker_browser:latest .
+docker push YOUR_DOCKERHUB_USERNAME/docker_browser:latest
+```
+
+Replace `YOUR_DOCKERHUB_USERNAME` with your Docker Hub username (e.g. `ayushman88`).
+
 ## Resource Limits
 
 Each container runs with:
