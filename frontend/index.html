@@ -3,10 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A secure, lightweight remote ephemeral browser session." />
+    
+    <!-- Adapts the browser UI color to match the background based on system theme -->
+    <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)" />
+
     <title>Remote Ephemeral Browser</title>
+
+    <!-- 
+      Minimal base styling to prevent unstyled layout shifts 
+      and jarring white flashes before your React CSS loads.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f9fafb; /* Subtle light gray */
+        color: #1f2937;
+      }
+
+      /* Native dark mode support before React mounts */
+      @media (prefers-color-scheme: dark) {
+        html, body {
+          background-color: #111827; /* Dark gray */
+          color: #f9fafb;
+        }
+      }
+
+      #root {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <noscript>
+      <div style="padding: 2rem; text-align: center;">
+        You need to enable JavaScript to run this app.
+      </div>
+    </noscript>
+    
+    <div id="root">
+      <!-- This content is visible while the React app is downloading/parsing -->
+      <!-- React will automatically replace everything inside #root once it mounts -->
+      <div style="display: flex; height: 100vh; width: 100%; align-items: center; justify-content: center;">
+        <p style="color: #6b7280; font-size: 1.125rem;">Initializing remote session...</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
