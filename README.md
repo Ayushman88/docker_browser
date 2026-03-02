@@ -107,6 +107,7 @@ Each container runs with:
 - **[Aryan Kale](https://github.com/hyper158)** — Worked in Docs and Architecture of the project
 - **[Sandesh Mutadak](https://github.com/sandesh910)** — Worked on Docker Files.
 - **[Madhav Adwalkar](https://github.com/Maddy2040)** — Worked on Frontend.
+- **[frchaitanyaaa](https://github.com/frchaitanyaaa)** — Enhancement on UI and Loading page.
   
 
 ## License
