@@ -104,6 +104,8 @@ Each container runs with:
 ## Contributors
 
 - **[Ayushman88](https://github.com/Ayushman88)** — Backend (Express API, Docker container lifecycle, session management)
+- **[Aryan Kale](https://github.com/hyper158)** — Worked in Docs and Architecture of the project
+  
 
 ## License
 
