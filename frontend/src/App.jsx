@@ -1,5 +1,8 @@
+// Import useState hook from React
+// useState is used to manage component state
 import { useState } from "react";
 
+// Get backend API URL from environment variable (Vite)
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export default function App() {
@@ -8,6 +11,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Function to start a new browser session
   async function startSession() {
     setLoading(true);
     setError(null);
@@ -32,6 +36,8 @@ export default function App() {
     }
   }
 
+
+  // Function to end the current browser session
   async function endSession() {
     if (!sessionId) return;
     setLoading(true);
