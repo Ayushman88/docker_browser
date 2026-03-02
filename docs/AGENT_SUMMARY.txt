@@ -1,0 +1,48 @@
+WHAT WE DID (MINIMAL, LAYMAN)
+
+We made an app where you click "Start Private Browser" and get a Chrome that runs inside a box (container) on the server. When you are done, you click "End Session" and that box is deleted. So each time you get a fresh, private browser.
+
+We did two things with Docker:
+1. We pulled a ready-made image that has Chrome and a way to see it in the browser (noVNC). We did not build this image ourselves.
+2. We built our own image for the backend (the small server that creates and stops those Chrome boxes).
+
+DOCKER COMMANDS WE USED
+
+To get the Chrome image (pull, one-time):
+  docker pull nkpro/chrome-novnc:latest
+  (On Mac M1/M2/M3 use: docker pull --platform linux/amd64 nkpro/chrome-novnc:latest)
+
+To build our backend image:
+  cd backend
+  docker build -t rebrowser-backend:latest .
+
+To run the backend so it can create Chrome containers:
+  docker run -d --name rebrowser-api -v /var/run/docker.sock:/var/run/docker.sock -p 3001:3001 rebrowser-backend:latest
+
+RESOURCE LIMITS WE GAVE TO EACH CHROME CONTAINER
+
+When the app starts a private browser, it runs that container with:
+- Memory: 512 MB
+- CPU: 1 core
+- Shared memory: 2 GB (needed for Chrome to work properly)
+- Auto-remove: when you end the session, the container is removed
+
+These are set in code (docker.js), not by typing extra flags. The equivalent full command would be something like:
+  docker run -d --name rebrowser-<id> -p <port>:5980 -e RESOLUTION=1280x720x24 -m 512m --cpus=1.0 --shm-size=2g --rm nkpro/chrome-novnc:latest
+
+So in short: one pull for the Chrome image, one build for our backend, one run for the backend; resources (512m, 1 CPU, 2g shm) are applied to each Chrome session container by the app.
+
+
+BRIEF MEANING OF THE FLAGS
+
+docker pull:
+  --platform linux/amd64   Use the x86/Intel version of the image. Needed on Mac M1/M2/M3 so the image runs correctly (the image may not have an ARM build).
+
+docker build:
+  -t rebrowser-backend:latest   Tag the image: give it the name "rebrowser-backend" and tag "latest" so you can run it by that name.
+
+docker run:
+  -d   Detached. Run the container in the background so your terminal is free; the container keeps running.
+  --name rebrowser-api   Give the container the name "rebrowser-api" so you can refer to it easily (e.g. docker stop rebrowser-api).
+  -v /var/run/docker.sock:/var/run/docker.sock   Volume mount. Make the host's Docker socket available inside the container so the backend can talk to Docker and create/stop other containers.
+  -p 3001:3001   Publish a port. Map container port 3001 to host port 3001 so you can call the API at http://localhost:3001.
