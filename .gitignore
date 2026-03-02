@@ -3,3 +3,9 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Cursor IDE (do not push)
+.cursor/
+
+# Local browser folder (do not push)
+browser/
