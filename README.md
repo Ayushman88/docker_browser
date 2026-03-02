@@ -106,7 +106,7 @@ Each container runs with:
 - **[Ayushman88](https://github.com/Ayushman88)** — Backend (Express API, Docker container lifecycle, session management)
 - **[Aryan Kale](https://github.com/hyper158)** — Worked in Docs and Architecture of the project
 - **[Sandesh Mutadak](https://github.com/sandesh910)** — Worked on Docker Files.
-- **[Maddy2040](https://github.com/Maddy2040)** — Worked on Frontend.
+- **[Madhav Adwalkar](https://github.com/Maddy2040)** — Worked on Frontend.
   
 
 ## License
