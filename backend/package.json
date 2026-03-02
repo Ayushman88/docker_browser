@@ -1,0 +1,16 @@
+{
+  "name": "rebrowser-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Remote Ephemeral Browser",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
+    "express": "^4.21.0"
+  }
+}
