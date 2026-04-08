@@ -52,8 +52,9 @@ jobs:
           ignore-unfixed: true
           scanners: vuln
 
+      # Publish only from default branch (push to main, or "Run workflow" on main).
       - name: Log in to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -61,7 +62,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push backend image to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           docker tag rebrowser-backend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-backend:latest
           docker tag rebrowser-backend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-backend:sha-${{ github.sha }}
@@ -69,7 +70,7 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/rebrowser-backend:sha-${{ github.sha }}
 
       - name: Push frontend image to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           docker tag rebrowser-frontend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:latest
           docker tag rebrowser-frontend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:sha-${{ github.sha }}
