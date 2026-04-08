@@ -64,15 +64,17 @@ jobs:
       - name: Push backend image to GHCR
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
-          docker tag rebrowser-backend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-backend:latest
-          docker tag rebrowser-backend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-backend:sha-${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/rebrowser-backend:latest
-          docker push ghcr.io/${{ github.repository_owner }}/rebrowser-backend:sha-${{ github.sha }}
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker tag rebrowser-backend:ci ghcr.io/${OWNER}/rebrowser-backend:latest
+          docker tag rebrowser-backend:ci ghcr.io/${OWNER}/rebrowser-backend:sha-${{ github.sha }}
+          docker push ghcr.io/${OWNER}/rebrowser-backend:latest
+          docker push ghcr.io/${OWNER}/rebrowser-backend:sha-${{ github.sha }}
 
       - name: Push frontend image to GHCR
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
-          docker tag rebrowser-frontend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:latest
-          docker tag rebrowser-frontend:ci ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:sha-${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:latest
-          docker push ghcr.io/${{ github.repository_owner }}/rebrowser-frontend:sha-${{ github.sha }}
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker tag rebrowser-frontend:ci ghcr.io/${OWNER}/rebrowser-frontend:latest
+          docker tag rebrowser-frontend:ci ghcr.io/${OWNER}/rebrowser-frontend:sha-${{ github.sha }}
+          docker push ghcr.io/${OWNER}/rebrowser-frontend:latest
+          docker push ghcr.io/${OWNER}/rebrowser-frontend:sha-${{ github.sha }}
