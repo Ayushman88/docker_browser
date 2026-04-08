@@ -12,6 +12,7 @@ import {
   getSession,
   deleteSession,
   getAllSessions,
+  listSessionsForOwner,
 } from "./sessionStore.js";
 
 const docker = new Docker();
@@ -164,6 +165,9 @@ export async function createBrowserSession(ownerEmail) {
       novncUrl,
       seleniumUrl: null,
       containerId: container.id,
+      containerName,
+      vncHostPort: hostPort,
+      dockerImage: CHROME_NOVNC_IMAGE,
     };
   } catch (err) {
     releasePort(hostPort);
@@ -214,7 +218,24 @@ export function getSessionStatus(sessionId, requesterEmail) {
     novncUrl,
     seleniumUrl: null,
     containerId: session.containerId,
+    containerName: `rebrowser-${sessionId}`,
+    vncHostPort: session.vncPort,
+    dockerImage: CHROME_NOVNC_IMAGE,
   };
+}
+
+export function listBrowserSessionsForUser(ownerEmail) {
+  const rows = listSessionsForOwner(ownerEmail);
+  const host = process.env.VNC_HOST || "localhost";
+  return rows.map((r) => ({
+    sessionId: r.sessionId,
+    containerId: r.containerId,
+    containerName: `rebrowser-${r.sessionId}`,
+    vncHostPort: r.vncPort,
+    novncUrl: `http://${host}:${r.vncPort}/vnc.html`,
+    dockerImage: CHROME_NOVNC_IMAGE,
+    createdAt: r.createdAt,
+  }));
 }
 
 export { getAllSessions };

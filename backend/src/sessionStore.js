@@ -27,3 +27,16 @@ export function deleteSession(sessionId) {
 export function getAllSessions() {
   return Object.fromEntries(sessions);
 }
+
+/** @returns {Array<{ sessionId: string, containerId: string, vncPort: number, ownerEmail: string, createdAt: number }>} */
+export function listSessionsForOwner(ownerEmail) {
+  const e = ownerEmail?.toLowerCase();
+  if (!e) return [];
+  const out = [];
+  for (const [sessionId, s] of sessions) {
+    if (s.ownerEmail === e) {
+      out.push({ sessionId, ...s });
+    }
+  }
+  return out;
+}

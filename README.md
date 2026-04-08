@@ -50,11 +50,11 @@ The app runs at `http://localhost:5173`.
 
 ### 4. Use the app
 
-1. Open `http://localhost:5173`
+1. Open `http://localhost:5173` (landing page → **Sign in** or **Get started**)
 2. Enter your email and request OTP
 3. Verify OTP and sign in (JWT issued by backend)
-4. Click **Start Private Browser**
-5. A new tab opens with the remote Chrome streamed via noVNC
+4. Open the **Console** (`/dashboard`), then **New browser session**
+5. A new tab opens with the remote Chrome streamed via noVNC; active containers appear in the session table
 6. If prompted for VNC password, use **passwd** (default for this image)
 7. Click **End Session** when done (container is removed automatically)
 
@@ -95,6 +95,7 @@ rebrowser/
 | POST | `/api/auth/verify-otp` | Verify OTP and return JWT |
 | GET | `/api/auth/me` | Validate JWT and return user |
 | POST | `/api/session` | Create a new browser session |
+| GET | `/api/sessions` | List your active sessions (container IDs, ports, image) |
 | GET | `/api/session/:id` | Get session status |
 | DELETE | `/api/session/:id` | End session and remove container |
 | GET | `/health` | Health check endpoint |

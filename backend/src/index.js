@@ -10,6 +10,7 @@ import {
   createBrowserSession,
   stopBrowserSession,
   getSessionStatus,
+  listBrowserSessionsForUser,
   warmupBrowserImage,
 } from "./docker.js";
 import { createOtpRecord, generateOtp, signAccessToken, verifyOtp } from "./auth.js";
@@ -84,6 +85,10 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json({ user: { email: req.user.email } });
 });
 
+app.get("/api/sessions", requireAuth, apiLimiter, (req, res) => {
+  res.json({ sessions: listBrowserSessionsForUser(req.user.email) });
+});
+
 app.post("/api/session", requireAuth, apiLimiter, async (req, res) => {
   try {
     const session = await createBrowserSession(req.user.email);
@@ -93,6 +98,10 @@ app.post("/api/session", requireAuth, apiLimiter, async (req, res) => {
       sessionId: session.sessionId,
       novncUrl: session.novncUrl,
       seleniumUrl: session.seleniumUrl,
+      containerId: session.containerId,
+      containerName: session.containerName,
+      vncHostPort: session.vncHostPort,
+      dockerImage: session.dockerImage,
     });
   } catch (err) {
     console.error("Failed to create session:", err);
