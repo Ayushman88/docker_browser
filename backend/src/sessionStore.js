@@ -1,12 +1,17 @@
 /**
  * In-memory session store for tracking active browser containers.
- * Maps sessionId -> { containerId, vncPort }
+ * Maps sessionId -> { containerId, vncPort, ownerEmail, createdAt }
  */
 
 const sessions = new Map();
 
-export function createSession(sessionId, containerId, vncPort) {
-  sessions.set(sessionId, { containerId, vncPort });
+export function createSession(sessionId, containerId, vncPort, ownerEmail) {
+  sessions.set(sessionId, {
+    containerId,
+    vncPort,
+    ownerEmail: ownerEmail?.toLowerCase() || null,
+    createdAt: Date.now(),
+  });
 }
 
 export function getSession(sessionId) {

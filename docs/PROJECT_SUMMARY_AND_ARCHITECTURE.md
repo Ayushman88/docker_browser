@@ -47,14 +47,14 @@ docker run -d \
 
 **Goal:** Provide a **disposable, isolated browser** that runs in a Docker container. The user gets a fresh environment per session, with CPU/memory limits and automatic removal when the session ends. Browsing is streamed to the user’s browser via noVNC.
 
-**Current scope (Phase 1 / ~30%):**
+**Current scope (Phase 1 baseline):**
 
 - User clicks “Start Private Browser” in the web UI.
 - Backend creates a container from `nkpro/chrome-novnc` (Chromium + noVNC).
 - User receives a noVNC URL and sees the remote desktop + Chromium in a new tab.
 - User browses in that isolated container; when done, “End Session” stops and removes the container (`--rm`).
 
-**Deferred:** Proxy per session, custom Dockerfile, WebRTC streaming, auth, persistent session store.
+**Deferred from Phase 1:** Proxy per session, WebRTC streaming, advanced multi-user orchestration.
 
 **Tech stack:**
 
@@ -64,7 +64,66 @@ docker run -d \
 
 ---
 
-## 3. Current Code Architecture
+## 3. Phase 2 Implementation (Current State)
+
+### 3.1 Authentication and Access Control
+
+- Added email OTP authentication flow:
+  - `POST /api/auth/send-otp`
+  - `POST /api/auth/verify-otp`
+  - `GET /api/auth/me`
+- OTP is emailed via Gmail SMTP (`APP_MAIL` + `APP_PASSWORD`) with a branded HTML template.
+- On successful OTP verification, backend issues JWT access token.
+- Session APIs now require bearer token authentication.
+- Session ownership is enforced: users can access/delete only their own sessions.
+
+### 3.2 Security Hardening
+
+- Added `helmet` for common HTTP security headers.
+- Added CORS allowlist support via `CORS_ORIGIN`.
+- Added layered rate limiting:
+  - OTP send/verify per IP
+  - OTP send/verify per email
+  - API request limiter for protected endpoints
+- Tightened JWT validation:
+  - algorithm allowlist (`HS256`)
+  - issuer/audience checks
+  - minimum secret strength enforcement
+- Added request body size limit (`10kb`) and reduced internal error leakage in API responses.
+- noVNC host port binding defaults to loopback (`VNC_BIND_IP=127.0.0.1`) to reduce remote hijack risk.
+
+### 3.3 Persistent Storage and Monitoring
+
+- Added persistent backend runtime data path (`DATA_DIR`, mounted to Docker volume).
+- OTP metadata and audit events are persisted on disk (volume-backed).
+- File permissions are tightened for persisted data files.
+- Added observability endpoints:
+  - `GET /health`
+  - `GET /metrics`
+- Added structured audit events (`otp_sent`, `otp_verified`, `session_created`, `session_deleted`)
+  with email hashing for safer logs.
+
+### 3.4 Docker Compose Multi-Container Setup
+
+- Added `docker-compose.yml` with:
+  - `backend` service
+  - `frontend` service
+  - shared bridge network for inter-container communication
+  - named volume (`backend_data`) for persistence
+  - backend healthcheck and restart policies
+- Added frontend production container setup with multi-stage build and Nginx.
+
+### 3.5 CI and Image Reliability (GitHub Actions + GHCR)
+
+- CI workflow builds backend and frontend Docker images.
+- Trivy image scanning is run for high/critical vulnerabilities.
+- Workflow is configured so:
+  - Pull requests run build + scan.
+  - Pushes to `main` run build + scan + push images to GHCR with `latest` and SHA tags.
+
+---
+
+## 4. Current Code Architecture
 
 ### High-level flow
 
@@ -166,12 +225,13 @@ flowchart TB
 
 ---
 
-## 4. Data flow (one session)
+## 5. Data flow (one authenticated session)
 
-1. User clicks “Start Private Browser” → frontend `POST /api/session`.
-2. Backend picks a free host port, calls `createContainer` then `start`, stores session in sessionStore, returns `sessionId` and `novncUrl`.
-3. Frontend opens `novncUrl` in a new tab; user sees noVNC and connects to the container’s Chromium desktop.
-4. User clicks “End Session” → frontend `DELETE /api/session/:id`.
-5. Backend looks up session, gets container, calls `container.stop({ t: 5 })`; with `--rm`, Docker removes the container; backend clears the session from sessionStore.
+1. User enters email and requests OTP via `POST /api/auth/send-otp`.
+2. User verifies OTP via `POST /api/auth/verify-otp` and receives JWT.
+3. Frontend stores JWT locally and calls protected `POST /api/session`.
+4. Backend validates JWT, ensures browser image exists (pulls if missing), creates + starts container, stores owner-scoped session metadata, and returns `sessionId` + `novncUrl`.
+5. User opens `novncUrl` and interacts with isolated Chromium session.
+6. User ends session with `DELETE /api/session/:id`; backend validates ownership, stops container, and removes session metadata.
 
-This document lists all Docker commands involved (via CLI equivalents and API usage), summarizes the project, and describes the current code architecture and data flow.
+This document lists Docker operations, summarizes the project, and captures the updated Phase 2 architecture with authentication, security, persistence, monitoring, and CI/container pipeline enhancements.

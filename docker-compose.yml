@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: rebrowser-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATA_DIR=/app/data
+      - CORS_ORIGIN=http://localhost:8080
+      - VNC_HOST=localhost
+      - VNC_BIND_IP=127.0.0.1
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - backend_data:/app/data
+    networks:
+      - rebrowser_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: rebrowser-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    networks:
+      - rebrowser_net
+
+volumes:
+  backend_data:
+
+networks:
+  rebrowser_net:
+    driver: bridge

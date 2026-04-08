@@ -9,3 +9,13 @@ dist/
 
 # Local browser folder (do not push)
 browser/
+
+# Persistent backend runtime data
+backend/data/
+
+# Docs: keep only project summary/architecture
+docs/*
+!docs/PROJECT_SUMMARY_AND_ARCHITECTURE.md
+
+# Project docs
+docs/
