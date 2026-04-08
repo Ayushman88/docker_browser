@@ -4,10 +4,13 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
+  # Run on every push so feature branches get CI without opening a PR.
   push:
-    branches: ["main"]
+  # Also run when a PR targets main (e.g. forks / required checks).
   pull_request:
     branches: ["main"]
+  # Actions tab → "Run workflow" to rerun without a new commit.
+  workflow_dispatch:
 
 jobs:
   build-and-scan:
