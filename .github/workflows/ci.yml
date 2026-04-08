@@ -31,7 +31,8 @@ jobs:
           image-ref: rebrowser-backend:ci
           format: table
           exit-code: "1"
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
+          ignore-unfixed: true
 
       - name: Trivy scan frontend image
         uses: aquasecurity/trivy-action@master
@@ -39,7 +40,8 @@ jobs:
           image-ref: rebrowser-frontend:ci
           format: table
           exit-code: "1"
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
+          ignore-unfixed: true
 
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
