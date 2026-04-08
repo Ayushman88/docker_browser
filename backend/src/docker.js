@@ -5,6 +5,7 @@
  */
 
 import Docker from "dockerode";
+import http from "http";
 import { randomUUID } from "crypto";
 import {
   createSession,
@@ -19,6 +20,17 @@ const CHROME_NOVNC_IMAGE = process.env.CHROME_NOVNC_IMAGE || "nkpro/chrome-novnc
 const CONTAINER_PORT = 5980; // noVNC web interface
 const VNC_BASE_PORT = 5980;
 const VNC_BIND_IP = process.env.VNC_BIND_IP || "127.0.0.1";
+/** MB; Chrome starts faster with >=768MB than 512MB under load */
+const CHROME_MEMORY_MB = Math.min(
+  4096,
+  Math.max(256, Number(process.env.CHROME_MEMORY_MB || 768)),
+);
+const CHROME_NANO_CPUS = Number(process.env.CHROME_NANO_CPUS || 2e9);
+const NOVNC_READY_WAIT = String(process.env.NOVNC_READY_WAIT || "false").toLowerCase() === "true";
+const NOVNC_READY_TIMEOUT_MS = Number(process.env.NOVNC_READY_TIMEOUT_MS || 120000);
+const NOVNC_READY_POLL_MS = Number(process.env.NOVNC_READY_POLL_MS || 400);
+/** Where the API process can reach the host-mapped noVNC port (host: 127.0.0.1, API in Docker Desktop: host.docker.internal) */
+const NOVNC_READY_HOST = process.env.NOVNC_READY_HOST || "127.0.0.1";
 
 // Track which ports are in use
 const usedPorts = new Set();
@@ -68,6 +80,48 @@ async function ensureImagePresent(imageName) {
   }
 }
 
+/** Pull session image early so the first user is not blocked on download. */
+export function warmupBrowserImage() {
+  return ensureImagePresent(CHROME_NOVNC_IMAGE);
+}
+
+function novncHttpReachable(host, port, pathname) {
+  return new Promise((resolve) => {
+    const req = http.request(
+      {
+        host,
+        port,
+        path: pathname,
+        method: "GET",
+        timeout: 2500,
+      },
+      (res) => {
+        res.resume();
+        resolve(res.statusCode >= 200 && res.statusCode < 500);
+      },
+    );
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+    req.end();
+  });
+}
+
+async function waitUntilNovncListening(hostPort) {
+  const deadline = Date.now() + NOVNC_READY_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (await novncHttpReachable(NOVNC_READY_HOST, hostPort, "/vnc.html")) {
+      return;
+    }
+    await new Promise((r) => setTimeout(r, NOVNC_READY_POLL_MS));
+  }
+  throw new Error(
+    `noVNC did not become ready within ${NOVNC_READY_TIMEOUT_MS}ms (probe ${NOVNC_READY_HOST}:${hostPort}).`,
+  );
+}
+
 export async function createBrowserSession(ownerEmail) {
   const sessionId = randomUUID().slice(0, 8);
   const containerName = `rebrowser-${sessionId}`;
@@ -89,14 +143,17 @@ export async function createBrowserSession(ownerEmail) {
             },
           ],
         },
-        Memory: 512 * 1024 * 1024, // 512MB
-        NanoCpus: 1e9, // 1 CPU
+        Memory: CHROME_MEMORY_MB * 1024 * 1024,
+        NanoCpus: CHROME_NANO_CPUS,
         ShmSize: 2 * 1024 * 1024 * 1024, // 2GB for Chrome
         AutoRemove: true,
       },
     });
 
     await container.start();
+    if (NOVNC_READY_WAIT) {
+      await waitUntilNovncListening(hostPort);
+    }
     createSession(sessionId, container.id, hostPort, ownerEmail);
 
     const host = process.env.VNC_HOST || "localhost";

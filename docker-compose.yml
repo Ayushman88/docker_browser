@@ -10,6 +10,8 @@ services:
       - CORS_ORIGIN=http://localhost:8080
       - VNC_HOST=localhost
       - VNC_BIND_IP=127.0.0.1
+      # If you set NOVNC_READY_WAIT=true, probe host-mapped ports from inside this container:
+      - NOVNC_READY_HOST=host.docker.internal
     ports:
       - "3001:3001"
     restart: unless-stopped

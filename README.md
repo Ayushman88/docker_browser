@@ -153,10 +153,12 @@ Replace `YOUR_DOCKERHUB_USERNAME` with your Docker Hub username (e.g. `ayushman8
 
 Each container runs with:
 
-- **Memory**: 512MB
-- **CPU**: 1 core
+- **Memory**: configurable (`CHROME_MEMORY_MB`, default **768MB** — was 512MB)
+- **CPU**: configurable (`CHROME_NANO_CPUS`, default **2** cores worth of CPU quota)
 - **Shared memory**: 2GB (required for Chrome)
 - **Auto-remove**: Container is deleted when the session ends
+
+**Why the first session can feel slow:** the `nkpro/chrome-novnc` image may need a **pull**, and **Chrome cold-starts** inside the VM. On **Apple Silicon**, session containers run as **linux/amd64** (emulation), which adds overhead. The API **pre-pulls the browser image in the background** after startup so later sessions start faster. Pre-pull on the host also helps: `docker pull nkpro/chrome-novnc:latest`.
 
 ## Security and Image Reliability
 

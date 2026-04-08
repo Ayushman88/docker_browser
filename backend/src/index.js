@@ -10,6 +10,7 @@ import {
   createBrowserSession,
   stopBrowserSession,
   getSessionStatus,
+  warmupBrowserImage,
 } from "./docker.js";
 import { createOtpRecord, generateOtp, signAccessToken, verifyOtp } from "./auth.js";
 import { sendOtpEmail } from "./mailer.js";
@@ -134,4 +135,7 @@ app.delete("/api/session/:id", requireAuth, apiLimiter, async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Rebrowser API running at http://localhost:${PORT}`);
+  warmupBrowserImage()
+    .then(() => console.log("Session browser image ready (background warmup)."))
+    .catch((err) => console.warn("Session browser image warmup:", err.message));
 });
