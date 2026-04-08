@@ -34,7 +34,9 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/sessions`, { headers: authHeaders });
+      const res = await fetch(`${API_URL}/api/sessions`, {
+        headers: authHeaders,
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load sessions");
       setSessions(data.sessions || []);
@@ -54,9 +56,15 @@ export default function DashboardPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/session`, { method: "POST", headers: authHeaders });
+      const res = await fetch(`${API_URL}/api/session`, {
+        method: "POST",
+        headers: authHeaders,
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || "Failed to start session");
+      if (!res.ok)
+        throw new Error(
+          data.message || data.error || "Failed to start session",
+        );
       await refreshSessions();
       window.open(data.novncUrl, "_blank", "noopener,noreferrer");
     } catch (e) {
@@ -71,9 +79,13 @@ export default function DashboardPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/session/${sessionId}`, { method: "DELETE", headers: authHeaders });
+      const res = await fetch(`${API_URL}/api/session/${sessionId}`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || "Failed to end session");
+      if (!res.ok)
+        throw new Error(data.message || data.error || "Failed to end session");
       await refreshSessions();
     } catch (e) {
       setError(e.message);
@@ -113,7 +125,11 @@ export default function DashboardPage() {
               <span className="dash-search-icon" aria-hidden />
               <span className="dash-email">{email}</span>
             </div>
-            <button type="button" className="btn btn-outline btn-sm btn-pill" onClick={() => logout()}>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm btn-pill"
+              onClick={() => logout()}
+            >
               Sign out
             </button>
           </div>
@@ -123,19 +139,30 @@ export default function DashboardPage() {
       <div className="dash-layout shell-wide-dash">
         <aside className="dash-side">
           <p className="dash-side-title">Shortcuts</p>
-          <button type="button" className="btn btn-ink btn-block btn-pill" disabled={busy} onClick={startSession}>
+          <button
+            type="button"
+            className="btn btn-ink btn-block btn-pill"
+            disabled={busy}
+            onClick={startSession}
+          >
             {busy ? "Working…" : "+ New browser session"}
           </button>
-          <button type="button" className="btn btn-outline btn-block btn-pill" disabled={loading} onClick={refreshSessions}>
+          <button
+            type="button"
+            className="btn btn-outline btn-block btn-pill"
+            disabled={loading}
+            onClick={refreshSessions}
+          >
             {loading ? "Refreshing…" : "Refresh list"}
           </button>
           <nav className="dash-side-nav">
             <Link to="/" className="dash-side-link">
-              ← Back to marketing site
+              ← Back to homepage
             </Link>
           </nav>
           <p className="dash-side-foot">
-            Streams use <strong>noVNC</strong>. Containers use the pattern <code className="mono-inline">rebrowser-&lt;id&gt;</code>.
+            Streams use <strong>noVNC</strong>. Containers use the pattern{" "}
+            <code className="mono-inline">rebrowser-&lt;id&gt;</code>.
           </p>
         </aside>
 
@@ -143,7 +170,10 @@ export default function DashboardPage() {
           <div className="dash-panel-header">
             <div>
               <h1 className="dash-panel-title">App sessions</h1>
-              <p className="dash-panel-desc">Live Docker containers you own. Open noVNC or end a session to free the host port.</p>
+              <p className="dash-panel-desc">
+                Live Docker containers you own. Open noVNC or end a session to
+                free the host port.
+              </p>
             </div>
             <div className="dash-panel-stat">
               <span className="dash-panel-stat-label">Active</span>
@@ -161,7 +191,10 @@ export default function DashboardPage() {
             <div className="empty-panel">
               <div className="empty-panel-icon" aria-hidden />
               <h2>No active sessions</h2>
-              <p>Use <strong>New browser session</strong> in the sidebar. The first launch can take a little while while the image is ready.</p>
+              <p>
+                Use <strong>New browser session</strong> in the sidebar. The
+                first launch can take a little while while the image is ready.
+              </p>
             </div>
           )}
 
@@ -186,7 +219,9 @@ export default function DashboardPage() {
                         <code className="mono">{s.sessionId}</code>
                       </td>
                       <td>
-                        <code className="mono text-soft">{s.containerName}</code>
+                        <code className="mono text-soft">
+                          {s.containerName}
+                        </code>
                       </td>
                       <td>
                         <code className="mono" title={s.containerId}>
@@ -201,10 +236,20 @@ export default function DashboardPage() {
                       </td>
                       <td className="text-soft">{formatTime(s.createdAt)}</td>
                       <td className="td-actions">
-                        <a className="btn btn-outline btn-sm btn-pill" href={s.novncUrl} target="_blank" rel="noreferrer">
+                        <a
+                          className="btn btn-outline btn-sm btn-pill"
+                          href={s.novncUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Open noVNC
                         </a>
-                        <button type="button" className="btn btn-danger-soft btn-sm btn-pill" disabled={busy} onClick={() => endSession(s.sessionId)}>
+                        <button
+                          type="button"
+                          className="btn btn-danger-soft btn-sm btn-pill"
+                          disabled={busy}
+                          onClick={() => endSession(s.sessionId)}
+                        >
                           End
                         </button>
                       </td>
