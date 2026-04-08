@@ -1,8 +1,6 @@
-# Backend API for Remote Ephemeral Browser
-# When running: mount Docker socket so the app can create browser containers
-#   docker run -v /var/run/docker.sock:/var/run/docker.sock -p 3001:3001 youruser/rebrowser-backend:latest
-
 FROM node:20-alpine3.22
+
+RUN apk upgrade --no-cache
 
 WORKDIR /app
 
