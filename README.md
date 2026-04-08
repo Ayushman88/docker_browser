@@ -163,7 +163,8 @@ Each container runs with:
 - Uses environment variables for secrets and runtime config.
 - API endpoints are protected using JWT bearer tokens (post-OTP login).
 - noVNC host ports are bound to loopback (`127.0.0.1`) by default to prevent direct remote session hijacking.
-- Image scanning is configured in GitHub Actions via Trivy (`.github/workflows/ci.yml`).
+- Image scanning is configured in GitHub Actions via Trivy (`.github/workflows/ci.yml`): **CRITICAL** findings with a known fix fail the build; unfixed issues are ignored for the gate (see workflow).
+- Production Dockerfiles use **Alpine 3.22** bases (`node:20-alpine3.22`, `nginx:1.29-alpine3.22`) to keep OS-layer patches current.
 - Frontend image uses a multi-stage Docker build for optimization.
 - For production, use a secret manager / Docker secrets and rotate SMTP + JWT secrets regularly.
 
@@ -177,8 +178,8 @@ Each container runs with:
 
 The provided CI pipeline demonstrates:
 1. Build backend and frontend container images.
-2. Scan images for high/critical vulnerabilities.
-3. Fail pipeline on unsafe image findings.
+2. Scan images with Trivy (critical gate as configured in the workflow).
+3. On `main`, push images to GHCR after a successful scan.
 
 ## Contributors
 

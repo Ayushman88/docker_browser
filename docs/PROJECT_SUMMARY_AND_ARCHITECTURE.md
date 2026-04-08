@@ -112,11 +112,12 @@ docker run -d \
   - named volume (`backend_data`) for persistence
   - backend healthcheck and restart policies
 - Added frontend production container setup with multi-stage build and Nginx.
+- **Base image pins (supply-chain / scan hygiene):** backend and frontend build stages use `node:20-alpine3.22`; the frontend runtime stage uses `nginx:1.29-alpine3.22` so Alpine packages (e.g. OpenSSL, libxml2) stay on a maintained track and Trivy CRITICAL OS findings stay actionable.
 
 ### 3.5 CI and Image Reliability (GitHub Actions + GHCR)
 
-- CI workflow builds backend and frontend Docker images.
-- Trivy image scanning is run for high/critical vulnerabilities.
+- CI workflow builds backend and frontend Docker images, then runs **Trivy** with `severity: CRITICAL` and `ignore-unfixed: true` (fails the job only on fixable critical issues; still surfaces other severities in logs when visible).
+- Workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` for GitHub Actions compatibility with the Node 20 → 24 runner migration.
 - Workflow is configured so:
   - Pull requests run build + scan.
   - Pushes to `main` run build + scan + push images to GHCR with `latest` and SHA tags.
